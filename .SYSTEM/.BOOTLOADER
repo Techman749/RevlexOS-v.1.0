@@ -1,0 +1,703 @@
+--bootloader_AIDA_Bootloader
+function boot64()
+os.pullEvent = os.pullEventRaw
+term.setBackgroundColor(colors.gray)
+local lockedBoot = ""
+
+function clear()
+	term.clear()
+	term.setCursorPos(1,1)
+end
+
+--[[modified from AxOS]]--
+function axerror(msg)
+	clear()
+	local x,y = term.getCursorPos()
+	local a = "Boot Error!"
+	local b = msg or "#Arg2Missing"
+	local c = math.floor(28 - string.len(a)) / 2
+	local d = 0
+	local e = ""
+	local f = ""
+	local g = 0
+
+	if string.len(b) > 52 then
+		b = string.sub(b, 1, 52)
+	end
+
+	if string.len(b) > 26 then
+		e = string.sub(b, 1, 26)
+		f = string.sub(b, 27)
+	else
+		e = b
+	end
+
+	d = (28 - string.len(b))
+
+	term.setCursorPos(11, 4)
+	write("|----------------------------|")
+	term.setCursorPos(11, 5)
+	write("|")
+	for i = 1,c do write(" ") end
+	write(a)
+	for i = 1,c do write(" ") end
+	if not (c % 2 == 0) then write(" ") end
+	write("|")
+	term.setCursorPos(11, 6)
+	write("|----------------------------|")
+	term.setCursorPos(11, 7)
+	write("|                            |")
+	term.setCursorPos(11, 8)
+	--write("|                            |")
+	write("| " .. e)
+	if (26 - string.len(e)) == 0 then
+		write(" |")
+	else
+		for i = 1,(26 - string.len(e)) do write(" ") end
+		write(" |")
+	end
+	term.setCursorPos(11, 9)
+	--write("|                            |")
+	write("| " .. f)
+	if (26 - string.len(f)) == 0 then
+		write(" |")
+	else
+		for i = 1,(26 - string.len(f)) do write(" ") end
+		write(" |")
+	end
+	term.setCursorPos(11, 10)
+	write("|                            |")
+	term.setCursorPos(11, 11)
+	write("|----------------------------|")
+	term.setCursorPos(11, 12)
+	write("|          [Reboot]          |")
+	term.setCursorPos(11, 13)
+	write("|----------------------------|")
+
+	while true do
+		local ev, p1 = os.pullEvent("key")
+		if p1 == 28 then
+			break
+		end
+	end
+	
+	os.reboot()
+
+	term.setCursorPos(x,y)
+end
+
+local function GetOSList()
+
+	local dlist = fs.list("")
+	local oses = {}
+	local found = 0
+	for _,file in ipairs( dlist ) do
+		if found > 99 then
+			--Limit of 8 Operating Systems
+			return oses
+		end
+
+  		if fs.isDir(file) then
+			if fs.exists(file .. "/boot") then
+				local f = fs.open(file .. "/boot", "r")
+				local v = tonumber(f.readLine())
+
+				if v > 0 then
+					local platform = 3;
+					local name = "";
+					local version = 0;
+					local boot = "start.sys"
+					
+					if v == 1 then
+						--An older version, still adding support
+						name = f.readLine()
+						version = f.readLine()
+						boot = f.readLine()
+					elseif v == 2 then
+						platform = f.readLine() --Reserved for future use
+						name = f.readLine()
+						version = f.readLine()
+						boot = f.readLine()
+					end
+					
+					if lockedBoot == name then
+						clear()
+						write("Booting " .. name .. "...\n")
+						local err, msg = pcall(function() dofile(file .. "/" .. boot) end)
+						if err == false then
+							axerror(msg)
+							sleep(5)
+							os.shutdown()
+						end
+						
+						axerror("System loop broken too early!")
+						sleep(5)
+						os.shutdown()
+						return
+					end
+					
+					table.insert(oses, {dir = file, name = name, version = version, boot = boot, platform = platform})
+				end
+			end
+		end
+		found = found + 1
+	end
+	
+	return oses
+end
+
+local function tablelength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
+
+clear()
+term.setTextColor(colors.white)
+term.setCursorPos(1,3)
+print("---------------------------------------------------")
+term.setTextColor(colors.yellow)
+term.setCursorPos(1,1)
+textutils.slowPrint("Loading Uni-Boot v.1.0")
+term.setTextColor(colors.lime)
+term.setCursorPos(1,2)
+textutils.slowPrint("Written by: Techman749")
+sleep(1)
+term.setCursorPos(1,6)
+textutils.slowPrint("Searching for OS's...")
+sleep(0.5)
+local oslist = GetOSList()
+
+if (not lockedBoot == "" or not lockedBoot == nil) then
+	return
+end
+
+local os_lists = tablelength(oslist) + 1
+local menuselect = 1
+local customboot = false
+sleep(0.2)
+
+local codetoname = {
+[0]="UNKNOWN",
+[1]="ESCAPE",        [2]="1",  [3]="2",  [4]="3",  [5]="4",  [6]="5",
+ [7]="6",  [8]="7",  [9]="8", [10]="9",
+[11]="0", [12]="-", [13]="=", [14]="BACKSPACE",   [15]="TAB",
+[16]="q", [17]="w", [18]="e", [19]="r", [20]="t",
+[21]="y", [22]="u", [23]="i", [24]="o", [25]="p",
+[26]="[", [27]="]", [28]="ENTER",       [29]="LEFTCTRL",    [30]="a",
+[31]="s", [32]="d", [33]="f", [34]="g", [35]="h",
+[36]="j", [37]="k", [38]="l", [39]=";", [40]="'",
+[41]="~", [42]="LEFTSHIFT",   [43]="\\",[44]="z", [45]="x",
+[46]="c", [47]="v", [48]="b", [49]="n", [50]="m",
+[51]=",", [52]=".", [53]="/", [54]="RIGHTSHIFT",  [55]="*",
+[56]="LEFTALT",     [57]=" ", [58]="CAPSLOCK",    [59]="F1",[60]="F2",
+[61]="F3",[62]="F4",[63]="F5",[64]="F6",[65]="F7",
+[66]="F8",[67]="F9",[68]="F10",[69]="NUMLOCK",    [70]="SCROLLLOCK",
+[71]="7", [72]="8", [73]="9", [74]="-", [75]="4",
+[76]="5", [77]="6", [78]="+", [79]="1", [80]="2",
+[81]="3", [82]="0", [83]=".", 
+[87]="F11",[88]="F12",
+[156]="\n",[157]="RIGHTCTRL",[181]="/",[184]="RIGHTALT",   [199]="HOME",
+[200]="ARROW_UP",  [201]="PAGEUP",     [203]="ARROW_LEFT", [205]="ARROW_RIGHT",
+[207]="END",       [208]="ARROW_DOWN", [209]="PAGEDOWN",   [210]="INSERT",
+[211]="DELETE",    [256]="LEFTMOUSE",  [257]="RIGHTMOUSE", [258]="MIDDLEMOUSE",
+[259]="MOUSE3",    [260]="MOUSE4",     [261]="MOUSE5",     [262]="MOUSE6",
+[263]="MOUSE7",    [264]="MOUSEWHEELUP",[265]="MOUSEWHEELDOWN",
+}
+
+local function rendermenu()
+	clear()
+ term.setTextColor(colors.lime)
+	write("\n")
+	write("  +--------------------------------------------+\n")
+	write("  |                Uni-Boot v.1.0              |\n")
+	write("  +--------------------------------------------+\n")
+	write("  |                                            |\n")
+	
+	if not customboot then
+		--Look for OS's
+		local id = 1
+		for k,v in pairs(oslist) do
+			local spacesn = (47 - (string.len(v.name) + 11)) - (string.len(tostring(v.version)) + 2)
+			local spaces = ""
+
+			for i = 1,spacesn do spaces = spaces .. " " end
+
+			if menuselect == id then
+				write("  |  [*] - " .. v.name  .. " v" .. v.version.. spaces .. "|\n")
+			else 
+				write("  |  [ ] - " .. v.name  .. " v" .. v.version.. spaces .. "|\n")
+			end
+			id = id + 1
+		end
+		
+		if menuselect == os_lists then
+			write("  |  [*] - Custom Boot Path                    |\n")
+		else
+			write("  |  [ ] - Custom Boot Path                    |\n")
+		end
+	else
+		write("  |                                            |\n")
+		write("  |                                            |\n")
+		write("  +--------------------------------------------+\n")
+
+		local path = ""
+		term.setCursorPos(13,6)
+		write("Path: " .. path)
+
+		while true do
+			local event, p1, p2 = os.pullEvent("key")
+
+			if p1 == 14 then
+				--Backspace
+				if string.len(path) > 0 then
+					path = string.sub(1, string.len(path) - 1)
+				end
+			elseif p1 > 15 and p1 < 26 then
+				if string.len(path) < 28 then
+				path = path .. codetoname[p1]
+				end
+			elseif p1 == 28 then
+				--Enter
+				clear()
+    term.setTextColor(colors.lime)
+				textutils.slowPrint("Booting " .. path .. "...")
+    sleep(2)
+
+				if (not fs.exists(path)) or (fs.isDir(path)) then
+					sleep(0.5)
+     term.setTextColor(colors.red)
+					write("Unable to find boot script!\n")
+					sleep(1)
+					clear()
+					shell.run("/.system/.bootloader")
+					return
+				end
+
+				dofile(path)
+				os.shutdown()
+				return
+			elseif p1 > 29 and p1 < 39 then
+				if string.len(path) < 28 then
+				path = path .. codetoname[p1]
+				end
+			elseif p1 > 43 and p1 < 51 then
+				if string.len(path) < 28 then
+				path = path .. codetoname[p1]
+				end
+			elseif p1 == 57 then
+				if string.len(path) < 28 then
+				path = path .. " "
+				end
+			elseif p1 == 52 then
+				if string.len(path) < 28 then
+				path = path .. "."
+				end
+			elseif p1 == 53 then
+				if string.len(path) < 28 then
+				path = path .. "/"
+				end
+			end
+
+			term.setCursorPos(13,6)
+			write("                                   ")
+			term.setCursorPos(13,6)
+			write("Path: " .. path)
+		end
+	end
+	write("  |                                            |\n")
+	write("  +--------------------------------------------+\n")
+ term.setTextColor(colors.yellow)
+ write("  (64-bit Edition) v. 1.0 Written By: Techman749")
+end
+
+rendermenu()
+while true do
+	local event, p1, p2 = os.pullEvent("key")
+	
+	if os_lists > 1 then
+		if p1 == 200 then
+			--Up
+			if menuselect > 1 then
+				menuselect = menuselect - 1
+				rendermenu()
+			end
+		elseif p1 == 208 then
+			--Down
+			if menuselect < os_lists then
+				menuselect = menuselect + 1
+				rendermenu()
+			end
+		elseif p1 == 28 then
+			--Enter
+			if menuselect == os_lists then
+				customboot = true
+				rendermenu()
+			else
+				clear()
+    term.setTextColor(colors.lime)
+				write("Booting " .. oslist[menuselect].name .. "...\n")
+				local err, msg = pcall(function() dofile(oslist[menuselect].dir .. "/" .. oslist[menuselect].boot) end)
+				if err == false then
+					axerror(msg)
+					sleep(5)
+					os.shutdown()
+				end
+				return
+			end
+		end
+	else
+		customboot = true
+		rendermenu()
+	end
+end
+end
+
+function boot32()
+os.pullEvent = os.pullEventRaw
+
+local lockedBoot = ""
+
+function clear()
+	term.clear()
+	term.setCursorPos(1,1)
+end
+
+--[[modified from AxOS]]--
+function axerror(msg)
+	clear()
+	local x,y = term.getCursorPos()
+	local a = "Boot Error!"
+	local b = msg or "#Arg2Missing"
+	local c = math.floor(28 - string.len(a)) / 2
+	local d = 0
+	local e = ""
+	local f = ""
+	local g = 0
+
+	if string.len(b) > 52 then
+		b = string.sub(b, 1, 52)
+	end
+
+	if string.len(b) > 26 then
+		e = string.sub(b, 1, 26)
+		f = string.sub(b, 27)
+	else
+		e = b
+	end
+
+	d = (28 - string.len(b))
+
+	term.setCursorPos(11, 4)
+	write("|----------------------------|")
+	term.setCursorPos(11, 5)
+	write("|")
+	for i = 1,c do write(" ") end
+	write(a)
+	for i = 1,c do write(" ") end
+	if not (c % 2 == 0) then write(" ") end
+	write("|")
+	term.setCursorPos(11, 6)
+	write("|----------------------------|")
+	term.setCursorPos(11, 7)
+	write("|                            |")
+	term.setCursorPos(11, 8)
+	--write("|                            |")
+	write("| " .. e)
+	if (26 - string.len(e)) == 0 then
+		write(" |")
+	else
+		for i = 1,(26 - string.len(e)) do write(" ") end
+		write(" |")
+	end
+	term.setCursorPos(11, 9)
+	--write("|                            |")
+	write("| " .. f)
+	if (26 - string.len(f)) == 0 then
+		write(" |")
+	else
+		for i = 1,(26 - string.len(f)) do write(" ") end
+		write(" |")
+	end
+	term.setCursorPos(11, 10)
+	write("|                            |")
+	term.setCursorPos(11, 11)
+	write("|----------------------------|")
+	term.setCursorPos(11, 12)
+	write("|          [Reboot]          |")
+	term.setCursorPos(11, 13)
+	write("|----------------------------|")
+
+	while true do
+		local ev, p1 = os.pullEvent("key")
+		if p1 == 28 then
+			break
+		end
+	end
+	
+	os.reboot()
+
+	term.setCursorPos(x,y)
+end
+
+local function GetOSList()
+
+	local dlist = fs.list("")
+	local oses = {}
+	local found = 0
+	for _,file in ipairs( dlist ) do
+		if found > 99 then
+			--Limit of 8 Operating Systems
+			return oses
+		end
+
+  		if fs.isDir(file) then
+			if fs.exists(file .. "/boot") then
+				local f = fs.open(file .. "/boot", "r")
+				local v = tonumber(f.readLine())
+
+				if v > 0 then
+					local platform = 3;
+					local name = "";
+					local version = 0;
+					local boot = "start.sys"
+					
+					if v == 1 then
+						--An older version, still adding support
+						name = f.readLine()
+						version = f.readLine()
+						boot = f.readLine()
+					elseif v == 2 then
+						platform = f.readLine() --Reserved for future use
+						name = f.readLine()
+						version = f.readLine()
+						boot = f.readLine()
+					end
+					
+					if lockedBoot == name then
+						clear()
+						write("Booting " .. name .. "...\n")
+						local err, msg = pcall(function() dofile(file .. "/" .. boot) end)
+						if err == false then
+							axerror(msg)
+							sleep(5)
+							os.shutdown()
+						end
+						
+						axerror("System loop broken too early!")
+						sleep(5)
+						os.shutdown()
+						return
+					end
+					
+					table.insert(oses, {dir = file, name = name, version = version, boot = boot, platform = platform})
+				end
+			end
+		end
+		found = found + 1
+	end
+	
+	return oses
+end
+
+local function tablelength(T)
+  local count = 0
+  for _ in pairs(T) do count = count + 1 end
+  return count
+end
+
+clear()
+term.setCursorPos(1,3)
+print("---------------------------------------------------")
+term.setCursorPos(1,1)
+textutils.slowPrint("Loading Uni-Boot v.1.0")
+term.setCursorPos(1,2)
+textutils.slowPrint("Written by: Techman749")
+sleep(1)
+term.setCursorPos(1,6)
+textutils.slowPrint("Searching for OS's...")
+sleep(0.5)
+local oslist = GetOSList()
+
+if (not lockedBoot == "" or not lockedBoot == nil) then
+	return
+end
+
+local os_lists = tablelength(oslist) + 1
+local menuselect = 1
+local customboot = false
+sleep(0.2)
+
+local codetoname = {
+[0]="UNKNOWN",
+[1]="ESCAPE",        [2]="1",  [3]="2",  [4]="3",  [5]="4",  [6]="5",
+ [7]="6",  [8]="7",  [9]="8", [10]="9",
+[11]="0", [12]="-", [13]="=", [14]="BACKSPACE",   [15]="TAB",
+[16]="q", [17]="w", [18]="e", [19]="r", [20]="t",
+[21]="y", [22]="u", [23]="i", [24]="o", [25]="p",
+[26]="[", [27]="]", [28]="ENTER",       [29]="LEFTCTRL",    [30]="a",
+[31]="s", [32]="d", [33]="f", [34]="g", [35]="h",
+[36]="j", [37]="k", [38]="l", [39]=";", [40]="'",
+[41]="~", [42]="LEFTSHIFT",   [43]="\\",[44]="z", [45]="x",
+[46]="c", [47]="v", [48]="b", [49]="n", [50]="m",
+[51]=",", [52]=".", [53]="/", [54]="RIGHTSHIFT",  [55]="*",
+[56]="LEFTALT",     [57]=" ", [58]="CAPSLOCK",    [59]="F1",[60]="F2",
+[61]="F3",[62]="F4",[63]="F5",[64]="F6",[65]="F7",
+[66]="F8",[67]="F9",[68]="F10",[69]="NUMLOCK",    [70]="SCROLLLOCK",
+[71]="7", [72]="8", [73]="9", [74]="-", [75]="4",
+[76]="5", [77]="6", [78]="+", [79]="1", [80]="2",
+[81]="3", [82]="0", [83]=".", 
+[87]="F11",[88]="F12",
+[156]="\n",[157]="RIGHTCTRL",[181]="/",[184]="RIGHTALT",   [199]="HOME",
+[200]="ARROW_UP",  [201]="PAGEUP",     [203]="ARROW_LEFT", [205]="ARROW_RIGHT",
+[207]="END",       [208]="ARROW_DOWN", [209]="PAGEDOWN",   [210]="INSERT",
+[211]="DELETE",    [256]="LEFTMOUSE",  [257]="RIGHTMOUSE", [258]="MIDDLEMOUSE",
+[259]="MOUSE3",    [260]="MOUSE4",     [261]="MOUSE5",     [262]="MOUSE6",
+[263]="MOUSE7",    [264]="MOUSEWHEELUP",[265]="MOUSEWHEELDOWN",
+}
+
+local function rendermenu()
+	clear()
+	write("\n")
+	write("  +--------------------------------------------+\n")
+	write("  |                Uni-Boot v.1.0              |\n")
+	write("  +--------------------------------------------+\n")
+	write("  |                                            |\n")
+	
+	if not customboot then
+		--Look for OS's
+		local id = 1
+		for k,v in pairs(oslist) do
+			local spacesn = (47 - (string.len(v.name) + 11)) - (string.len(tostring(v.version)) + 2)
+			local spaces = ""
+
+			for i = 1,spacesn do spaces = spaces .. " " end
+
+			if menuselect == id then
+				write("  |  [*] - " .. v.name  .. " v" .. v.version.. spaces .. "|\n")
+			else 
+				write("  |  [ ] - " .. v.name  .. " v" .. v.version.. spaces .. "|\n")
+			end
+			id = id + 1
+		end
+		
+		if menuselect == os_lists then
+			write("  |  [*] - Custom Boot Path                    |\n")
+		else
+			write("  |  [ ] - Custom Boot Path                    |\n")
+		end
+	else
+		write("  |                                            |\n")
+		write("  |                                            |\n")
+		write("  +--------------------------------------------+\n")
+
+		local path = ""
+		term.setCursorPos(13,6)
+		write("Path: " .. path)
+
+		while true do
+			local event, p1, p2 = os.pullEvent("key")
+
+			if p1 == 14 then
+				--Backspace
+				if string.len(path) > 0 then
+					path = string.sub(1, string.len(path) - 1)
+				end
+			elseif p1 > 15 and p1 < 26 then
+				if string.len(path) < 28 then
+				path = path .. codetoname[p1]
+				end
+			elseif p1 == 28 then
+				--Enter
+				clear()
+				textutils.slowPrint("Booting " .. path .. "...")
+    sleep(2)
+
+				if (not fs.exists(path)) or (fs.isDir(path)) then
+					sleep(0.5)
+					write("Unable to find boot script!\n")
+					sleep(1)
+					clear()
+					shell.run("/.system/.bootloader")
+					return
+				end
+
+				dofile(path)
+				os.shutdown()
+				return
+			elseif p1 > 29 and p1 < 39 then
+				if string.len(path) < 28 then
+				path = path .. codetoname[p1]
+				end
+			elseif p1 > 43 and p1 < 51 then
+				if string.len(path) < 28 then
+				path = path .. codetoname[p1]
+				end
+			elseif p1 == 57 then
+				if string.len(path) < 28 then
+				path = path .. " "
+				end
+			elseif p1 == 52 then
+				if string.len(path) < 28 then
+				path = path .. "."
+				end
+			elseif p1 == 53 then
+				if string.len(path) < 28 then
+				path = path .. "/"
+				end
+			end
+
+			term.setCursorPos(13,6)
+			write("                                   ")
+			term.setCursorPos(13,6)
+			write("Path: " .. path)
+		end
+	end
+	write("  |                                            |\n")
+	write("  +--------------------------------------------+\n")
+ write("  (32-bit Edition) v. 1.0 Written By: Techman749")
+end
+
+rendermenu()
+while true do
+	local event, p1, p2 = os.pullEvent("key")
+	
+	if os_lists > 1 then
+		if p1 == 200 then
+			--Up
+			if menuselect > 1 then
+				menuselect = menuselect - 1
+				rendermenu()
+			end
+		elseif p1 == 208 then
+			--Down
+			if menuselect < os_lists then
+				menuselect = menuselect + 1
+				rendermenu()
+			end
+		elseif p1 == 28 then
+			--Enter
+			if menuselect == os_lists then
+				customboot = true
+				rendermenu()
+			else
+				clear()
+				write("Booting " .. oslist[menuselect].name .. "...\n")
+				local err, msg = pcall(function() dofile(oslist[menuselect].dir .. "/" .. oslist[menuselect].boot) end)
+				if err == false then
+					axerror(msg)
+					sleep(5)
+					os.shutdown()
+				end
+				return
+			end
+		end
+	else
+		customboot = true
+		rendermenu()
+	end
+end
+end
+
+if not term.isColor() then boot32() else boot64()
+end
