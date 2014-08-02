@@ -1,0 +1,6 @@
+term.clear()
+term.setCursorPos(1,1)
+shell.run("/rom/programs/adventure")
+shell.run("cd", "/"
+shell.exit()
+shell.run("shell")
