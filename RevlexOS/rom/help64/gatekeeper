@@ -1,0 +1,8 @@
+GateKeeper is a Program written by: Techman749. 
+It is a startup password program, meaning that once you boot into RevlexOS it will ask you for a password. 
+the default password is "hello" 
+You can change the password by going to your utilities folder and editing it. 
+To get to your utilities folder type "utilities", once you are in your utilities folder type "edit gatekeeper", once you are there just edit the second line (password = "hello"). 
+This Program is 99.99% unhackable, the only way for a hacker to access your system is if you leave your system open at your command-line.
+RevlexOS comes with the "Lite" version of gatekeeper, meaning that it's only a free version, and doesn't have as much security as the "Full" version. 
+The "Lite" version only give you a "Password: " screen.
