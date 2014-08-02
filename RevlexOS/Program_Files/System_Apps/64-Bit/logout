@@ -1,0 +1,7 @@
+--[[ Copyright (C) 2013 Logan Davis (aka: Techman749) 
+RevlexOS, A.I.D.A. OS (AIDA OS) and all of their variations (RevlexOS Server, RevlexOS Basic, 
+A.I.D.A. OS Server, A.I.D.A. OS Basic) are produced by Techman749. Please Ask for permission before attempting to 
+redistibute ANY code related to RevlexOS & A.I.D.A. OS or any of their variations, IN ANY WAY, SHAPE, OR FORM. 
+Copyright (C) 2013 Revlex Systems CEO: Techman749 (www.revlexsystems.webs.com) ]]--
+
+shell.run("/RevlexOS/Program_Files/Utilities/gatekeeper")
