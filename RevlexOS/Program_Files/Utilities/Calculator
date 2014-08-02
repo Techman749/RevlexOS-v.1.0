@@ -1,0 +1,52 @@
+--[[ Copyright (C) 2013 Logan Davis (aka: Techman749) 
+RevlexOS, A.I.D.A. OS (AIDA OS) and all of their variations (RevlexOS Server, RevlexOS Basic, 
+A.I.D.A. OS Server, A.I.D.A. OS Basic) are produced by Techman749. Please Ask for permission before attempting to 
+redistibute ANY code related to RevlexOS & A.I.D.A. OS or any of their variations, IN ANY WAY, SHAPE, OR FORM. 
+Copyright (C) 2013 Revlex Systems CEO: Techman749 (www.revlexsystems.webs.com) ]]--
+
+term.clear()
+term.setCursorPos(1,1)
+print("Revlex Calculator v. 1.0")
+term.setCursorPos(1,2)
+print("Written by: Techman749")
+term.setCursorPos(1,3)
+print("To return to the Calculator, run this again")
+term.setCursorPos(1,5)
+print("Please type your problem below:")
+local tEnv = {
+        ["exit"] = function()
+                bRunning = false
+        end,
+}
+setmetatable( tEnv, { __index = getfenv() } )
+local s = io.read()
+        local nForcePrint = 0
+        local func, e = loadstring( s )
+
+        local func2, e2 = loadstring( "return "..s )
+                if not func then
+                if func2 then
+                        func = func2
+                        e = nil
+                        nForcePrint = 1
+                end
+        else
+                if func2 then
+                        func = func2
+                end
+        end
+        if func then
+            setfenv( func, tEnv )
+        local tResults = { pcall( func ) }
+        if tResults[1] then
+                local n = 1
+                while (tResults[n + 1] ~= nil) or (n <= nForcePrint) do
+                        print( tostring( tResults[n + 1] ) )
+                        n = n + 1
+                end
+        else
+                print( tResults[2] )
+        end
+    else
+        print( e )
+    end
