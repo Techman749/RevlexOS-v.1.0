@@ -1,0 +1,53 @@
+--[[ Copyright (C) 2013 Logan Davis (aka: Techman749) 
+RevlexOS, A.I.D.A. OS (AIDA OS) and all of their variations (RevlexOS Server, RevlexOS Basic, 
+A.I.D.A. OS Server, A.I.D.A. OS Basic) are produced by Techman749. Please Ask for permission before attempting to 
+redistibute ANY code related to RevlexOS & A.I.D.A. OS or any of their variations, IN ANY WAY, SHAPE, OR FORM. 
+Copyright (C) 2013 Revlex Systems CEO: Techman749 (www.revlexsystems.webs.com) ]]--
+
+local sPath = ".:/RevlexOS/rom/programs"
+if turtle then
+	sPath = sPath..":/rom/programs/turtle"
+else
+	sPath = sPath..":/rom/programs/computer"
+	sPath = sPath..":/rom/programs"
+end
+if http then
+	sPath = sPath..":/rom/programs/http"
+end
+if term.isColor() then
+	sPath = sPath..":/rom/programs/color"
+	sPath = sPath..":/RevlexOS/Program_Files/Games"
+	sPath = sPath..":/RevlexOS/Program_Files/Multimedia"
+	sPath = sPath..":/RevlexOS/Program_Files/Utilities"
+	sPath = sPath..":/RevlexOS/Program_Files/System_Apps/64-Bit"
+	help.setPath("/RevlexOS/rom/help64")
+else
+	sPath = sPath..":/RevlexOS/Program_Files/Games"
+	sPath = sPath..":/RevlexOS/Program_Files/Utilities"
+	sPath = sPath..":/RevlexOS/Program_Files/System_Apps/32-Bit"
+	help.setPath("/RevlexOS/rom/help32")
+
+end
+
+shell.setPath( sPath )
+
+
+shell.setAlias( "ls", "list" )
+shell.setAlias( "dir", "list" )
+shell.setAlias( "cp", "copy" )
+shell.setAlias( "mv", "move" )
+shell.setAlias( "rm", "delete" )
+shell.setAlias( "restart", "reboot")
+
+if fs.exists( "/RevlexOS/rom/autorun" ) and fs.isDir( "/RevlexOS/rom/autorun" ) then
+	local tFiles = fs.list( "/RevlexOS/rom/autorun" )
+	table.sort( tFiles )
+	for n, sFile in ipairs( tFiles ) do
+		if string.sub( sFile, 1, 1 ) ~= "." then
+			local sPath = "/RevlexOS/rom/autorun/"..sFile
+			if not fs.isDir( sPath ) then
+				shell.run( sPath )
+			end
+		end
+	end
+end
