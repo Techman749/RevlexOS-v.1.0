@@ -1,0 +1,70 @@
+VERSION = 1.0
+function checkVersion()
+	local sCommand = "get"
+	if sCommand == "get" then
+		local sCode = "yNLqjiFf"
+		local sPath = ".tempVersion"
+
+		while true do
+			local response = http.get(
+				"http://pastebin.com/raw.php?i="..textutils.urlEncode( sCode )
+				)
+			
+			if response then
+				local sResponse = response.readAll()
+				response.close()
+				if tonumber(sResponse) > VERSION then informUpdate()
+				else 
+				print("No Updates Available")
+				end
+				break
+			else return false end
+		end
+	end
+end
+
+function informUpdate()
+term.clear()
+term.setCursorPos(1,1)
+print("RevlexOS Update Available!")
+term.setCursorPos(1,3)
+ print("Would you like to update?")
+ continue()
+ end
+function continue()
+ term.setCursorPos(1,4)
+ write("Y/N? ")
+ No1 = "n"
+ No2 = "N"
+ Yes1 = "y"
+ Yes2 = "Y"
+  Choice = read()
+  if Choice == Yes1 then
+  fetchUpdate()
+  elseif Choice == Yes2 then
+  fetchUpdate()
+  elseif Choice == No1 then
+  term.clear()
+  term.setCursorPos(1,1)
+  shell.exit()
+  shell.run("/RevlexOS/rom/programs/shell")
+  elseif Choice == No2 then
+  term.clear()
+  term.setCursorPos(1,1)
+  shell.exit()
+  shell.run("/RevlexOS/rom/programs/shell")
+  end
+  end
+  
+  
+  function fetchUpdate()
+  term.clear()
+  term.setCursorPos(1,1)
+  textutils.slowPrint("Downloading RevlexOS Installer...")
+  shell.run("/rom/programs/http/pastebin", "get", "cGc67QbY", "installer")
+  term.setCursorPos(1,4)
+  textutils.slowPrint("Download Complete!")
+  term.setCursorPos(1,5)
+  textutils.slowPrint("Run 'installer' to update!")
+end
+checkVersion()
