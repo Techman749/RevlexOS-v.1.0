@@ -1,0 +1,63 @@
+--[[ Copyright (C) 2013 Logan Davis (aka: Techman749) 
+RevlexOS, A.I.D.A. OS (AIDA OS) and all of their variations (RevlexOS Server, RevlexOS Basic, 
+A.I.D.A. OS Server, A.I.D.A. OS Basic) are produced by Techman749. Please Ask for permission before attempting to 
+redistibute ANY code related to RevlexOS & A.I.D.A. OS or any of their variations, IN ANY WAY, SHAPE, OR FORM. 
+Copyright (C) 2013 Revlex Systems CEO: Techman749 (www.revlexsystems.webs.com) ]]--
+ 
+--to change your password, edit the line below.
+password = "hello"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+oldpullEvent = os.pullEvent
+os.pullEvent = os.pullEventRaw
+term.clear()
+term.setCursorPos(1,1)
+print("GateKeeper v.1.0 (Lite)")
+term.setCursorPos(1,2)
+print("Written By: Techman749")
+term.setCursorPos(1,4)
+print("Please enter your password:")
+term.setCursorPos(1,5)
+write("Password: ")
+input = read("*")
+if input == password then
+term.setCursorPos(1,7)
+textutils.slowPrint("Authenticating Password...")
+sleep(2)
+term.setCursorPos(1,7)
+print("                          ")
+term.setCursorPos(1,7)
+textutils.slowPrint("Password is Correct!")
+sleep(1)
+term.setCursorPos(1,8)
+textutils.slowPrint("Logging in User...")
+sleep(0.5)
+shell.run("exit")
+shell.run("shell")
+else
+term.setCursorPos(1,7)
+textutils.slowPrint("Authenticating Password...")
+sleep(2)
+term.setCursorPos(1,7)
+print("                          ")
+term.setCursorPos(1,7)
+textutils.slowPrint("Password is Incorrect...")
+term.setCursorPos(1,9)
+textutils.slowPrint("Ending Session...")
+sleep(3)
+os.shutdown()
+end
