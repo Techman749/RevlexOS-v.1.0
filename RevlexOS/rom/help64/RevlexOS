@@ -1,0 +1,30 @@
+New Feature in RevlexOS:
+* Version: 1.0
+* Uses the new Uni-Boot Technology developed by Techman749.
+  . Version: 1.0 
+  . Installs Uni-Boot.
+  . Automatically adds the CraftOS & RevlexOS duel-boot.
+  . Adds support for multiple OS's.
+  . Supports Other Revlex Systems OS's
+
+* Installs Uni-Boot BIOS
+  . Version: 2.0
+  . Was Previously known as A.I.D.A. BIOS
+    (Went under a 100% code-rewrite)
+  . Checks file directories (to make sure they exist & are valid.)
+  . Loads modem supporter (Wireless,) (FINALLY!!!)
+  . More to come...
+
+* Comes with a few new Preloaded Programs!
+ . Exclusive FREE Versions of Revlex (C) Apps!
+  . Calculator(Full Version) 1.0 (32 & 64-bit)
+  . Gate Keeper(C) (Lite Version) 1.0 (32 & 64-bit)
+  . Many more Programs Coming!
+
+ . Preloaded with a few custom programs by others!
+  . FireWolf by GravityScore & 1lann (64-bit only)
+  . LightShot by GravityScore & 1lann (64-bit only)
+  . ccYouTube by remiX (64-bit only)
+  . nPaintPro by NitrogenFingers (64-bit only)
+  . Mineception by ComputerCraftFan11 (64-bit only)
+  . Many more CUSTOM Programs Coming!
