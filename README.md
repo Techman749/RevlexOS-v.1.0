@@ -3,6 +3,6 @@ RevlexOS
 An Operating System created for the Minecraft mod, ComputerCraft.
 
 
-RevlexOS 1.0 to be included in this Git, soon!
+The first version of RevlexOS that started it all!
 
 RevlexOS 1.1 is in the works! Expect a release soon!
